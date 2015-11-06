@@ -1,7 +1,9 @@
+import sys
 import socket
 import cmd
 import time
 import threading
+import chat
 
 SERVER = "larc.inf.furb.br"
 TCP_PORT = 1012
@@ -156,9 +158,34 @@ class Repl(cmd.Cmd):
     def do_log(self, line):
         print(users)
 
+def init_gui():
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    class MainWindow(QtWidgets.QMainWindow, chat.Ui_MainWindow):
+        def __init__(self, parent=None):
+            QtWidgets.QMainWindow.__init__(self)
+            self.setupUi(self)
+            self.btLogin.clicked.connect(self.login)
+
+        def login(self):
+            self.userid = self.edUsuario.text()
+            self.passwd = self.edSenha.text()
+            alive[self.userid] = self.passwd
+            self.edUsuario.setText("")
+            self.edSenha.setText("")
+            self.setWindowTitle(self.userid)
+
+
+    app = QtWidgets.QApplication(sys.argv)
+    mainwindow = MainWindow(None)
+    mainwindow.show()
+    app.exec_()
+
 if __name__ == '__main__':
     keepalive()
     try:
-        Repl().cmdloop()
+        if (len(sys.argv) >= 2):
+            init_gui()
+        else:
+            Repl().cmdloop()
     except:
         alivetimer.cancel()
